@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Optional, Union
 
 
 class Tokens(Enum):
@@ -16,6 +17,9 @@ class Tokens(Enum):
 
 
 class Token:
-    def __init__(self, type_: Tokens, context: dict):
+    def __init__(self, type_: Tokens, value: Optional[Union[int, float, str]] = None):
         self.type = type_
-        self.context = context
+        self.value = value
+
+    def __str__(self) -> str:
+        return f"<{self.type.name}: {self.value}>"

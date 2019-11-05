@@ -1,0 +1,5 @@
+
+
+class LexicalError(Exception):
+    """"""
+    pass
