@@ -1,4 +1,5 @@
 from enum import Enum
+from re import compile
 from typing import Optional, Union
 
 
@@ -12,7 +13,7 @@ class Tokens(Enum):
     MINUS = "-"
     INUM = "[0-9]+"
     FNUM = r"[0-9]+\.[0-9]+"
-    BLANK = "[ ]+"
+    BLANK = compile(r" +")
     END = r"\$"
 
 

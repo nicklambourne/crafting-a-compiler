@@ -1,4 +1,5 @@
 from typing import List, Optional, Tuple
+from os import linesep
 from re import match
 from .tokens import Token, Tokens
 from ..util.error import LexicalError
@@ -19,11 +20,9 @@ class Scanner:
         tokens = list()
 
         while self.index < self.length:
-            token, index = self.match_token()
+            token, self.index = self.match_token()
             tokens.append(token)
-            index += 1
-            print(self.content[self.index])
-            print(token)
+            self.index += 1
 
         return tokens
 
@@ -38,10 +37,11 @@ class Scanner:
             return Token(Tokens.End), self.index
 
         for token in Tokens:
-            print(token)
             if match(token.value, self.content[self.index]):
                 if token == Tokens.ID:
                     return Token(Tokens.ID, self.content[self.index]), self.index
+                else:
+                    return Token(token), self.index
 
         raise LexicalError
 
@@ -62,3 +62,6 @@ class Scanner:
                 self.index += 1
             value = float(value)
         return Token(type_, value), self.index
+
+    def __str__(self):
+        return f"\nScanner: \n{f'{linesep}'.join([str(token) for token in self.tokens])}"
