@@ -2,10 +2,14 @@ from typing import List, Optional, Tuple
 from os import linesep
 from re import match
 from .tokens import Token, Tokens
-from ..util.error import LexicalError
+from ..util import LexicalError
 
 
 class Scanner:
+    """
+    Simple scanner for the adding calculator programming language.
+    """
+
     def __init__(self, file: str):
         self.file = file
         self.index = 0
@@ -17,6 +21,10 @@ class Scanner:
         self.tokens = self.scan()
 
     def scan(self) -> List[Token]:
+        """
+        Scans the contents of the given file to produce a list of tokens.
+        :return: list of tokens corresponding to file contents
+        """
         tokens = list()
 
         while self.index < self.length:
@@ -24,9 +32,16 @@ class Scanner:
             tokens.append(token)
             self.index += 1
 
+        self.tokens.append(Token(Tokens.END))
+
         return tokens
 
     def match_token(self) -> Tuple[Optional[Token], int]:
+        """
+        Matches a single token from the content of the file, incrementing the index
+        as the content is processed.
+        :return: the matched token and the new index as a tuple (Token, index)
+        """
         while match(Tokens.BLANK.value, self.content[self.index]):
             self.index += 1
 
@@ -46,7 +61,14 @@ class Scanner:
         raise LexicalError
 
     def scan_digits(self) -> Tuple[Token, int]:
+        """
+        Scans for multi-digit numbers, identifying both integers or floats where
+        appropriate.
+        :return: the matched INUM or FNUM token with parsed value and the new index
+                 (Token, index)
+        """
         value = ""
+
         while self.index < self.length and match(r"[0-9]", self.content[self.index]):
             value += self.content[self.index]
             self.index += 1
