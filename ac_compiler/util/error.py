@@ -22,9 +22,10 @@ class SyntaxParsingError(Error):
             super().__init__(message)
         elif expected and actual:
             if type(expected) == list:
-                expected_value = f"{', '.join([expected_.type for expected_ in expected])}"
+                expected_value = f"{', '.join([expected_.name for expected_ in expected])}"
             else:
-                expected_value = expected.type
-            super().__init__(f"Expected {expected_value}, Got: {actual.type}")
+                expected_value = expected.name
+            super().__init__(f"Expected {expected_value}, "
+                             f"Got: {actual.type.name} ({actual.value})")
         else:
             super().__init__()

@@ -21,8 +21,9 @@ class Parser:
 
     def advance(self) -> Optional[Token]:
         if self.index < self.length:
+            token = self.tokens[self.index]
             self.index += 1
-            return self.tokens[self.index]
+            return token
         else:
             return None
 
@@ -32,6 +33,7 @@ class Parser:
     def expect(self, expected: Tokens):
         token = self.advance()
         if token.type == expected:
+            print(token)
             pass
         else:
             raise SyntaxParsingError(expected, token)
@@ -39,7 +41,7 @@ class Parser:
     def parse_program(self):
         expected = [Tokens.FLOATDCL, Tokens.INTDCL, Tokens.ID, Tokens.PRINT,
                     Tokens.END]
-        if self.peek() in expected:
+        if self.peek().type in expected:
             self.parse_declarations()
             self.parse_statements()
             self.expect(Tokens.END)
@@ -51,20 +53,20 @@ class Parser:
         expected_lambdas = [Tokens.ID, Tokens.PRINT, Tokens.END]
         union_expected = expected_declarations + expected_lambdas
 
-        if self.peek() not in union_expected:
+        if self.peek().type not in union_expected:
             raise SyntaxParsingError(union_expected, self.peek())
 
-        if self.peek() in expected_declarations:
+        if self.peek().type in expected_declarations:
             self.parse_declaration()
             self.parse_declarations()
-        elif self.peek() in expected_lambdas:
+        elif self.peek().type in expected_lambdas:
             pass
 
     def parse_declaration(self):
-        if self.peek() == Tokens.FLOATDCL:
+        if self.peek().type == Tokens.FLOATDCL:
             self.expect(Tokens.FLOATDCL)
             self.expect(Tokens.ID)
-        elif self.peek() == Tokens.INTDCL:
+        elif self.peek().type == Tokens.INTDCL:
             self.expect(Tokens.INTDCL)
             self.expect(Tokens.ID)
         else:
@@ -72,13 +74,14 @@ class Parser:
                                      self.peek())
 
     def parse_statements(self):
-        if self.peek() == Tokens.ID or self.peek() == Tokens.PRINT:
+        if self.peek().type in [Tokens.ID, Tokens.PRINT]:
             self.parse_statement()
             self.parse_statements()
-        elif self.peek() == Tokens.END:
+        elif self.peek().type == Tokens.END:
             pass
         else:
-            raise SyntaxParsingError
+            raise SyntaxParsingError([Tokens.ID, Tokens.PRINT, Tokens.END],
+                                     self.peek())
 
     def parse_statement(self):
         if self.peek().type == Tokens.ID:
@@ -93,26 +96,26 @@ class Parser:
             raise SyntaxParsingError
 
     def parse_value(self):
-        if self.peek() == Tokens.ID:
+        if self.peek().type == Tokens.ID:
             self.expect(Tokens.ID)
-        elif self.peek() == Tokens.INUM:
+        elif self.peek().type == Tokens.INUM:
             self.expect(Tokens.INUM)
-        elif self.peek() == Tokens.FNUM:
+        elif self.peek().type == Tokens.FNUM:
             self.expect(Tokens.FNUM)
         else:
             raise SyntaxParsingError([Tokens.ID, Tokens.FNUM, Tokens.INUM],
                                      self.peek())
 
     def parse_expression(self):
-        if self.peek() == Tokens.PLUS:
+        if self.peek().type == Tokens.PLUS:
             self.expect(Tokens.PLUS)
             self.parse_value()
             self.parse_expression()
-        elif self.peek() == Tokens.MINUS:
+        elif self.peek().type == Tokens.MINUS:
             self.expect(Tokens.MINUS)
             self.parse_value()
             self.parse_expression()
-        elif self.peek() in [Tokens.ID, Tokens.PRINT, Tokens.END]:
+        elif self.peek().type in [Tokens.ID, Tokens.PRINT, Tokens.END]:
             pass
         else:
             raise SyntaxParsingError([Tokens.PLUS, Tokens.MINUS, Tokens.ID,

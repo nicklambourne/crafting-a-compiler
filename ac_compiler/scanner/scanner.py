@@ -25,16 +25,16 @@ class Scanner:
         Scans the contents of the given file to produce a list of tokens.
         :return: list of tokens corresponding to file contents
         """
-        tokens = list()
+        self.tokens = list()
 
         while self.index < self.length:
             token, self.index = self.match_token()
-            tokens.append(token)
+            self.tokens.append(token)
             self.index += 1
 
         self.tokens.append(Token(Tokens.END))
 
-        return tokens
+        return self.tokens
 
     def match_token(self) -> Tuple[Optional[Token], int]:
         """
@@ -79,6 +79,7 @@ class Scanner:
         else:
             type_ = Tokens.FNUM
             value += self.content[self.index]
+            self.index += 1
             while self.index < self.length and match(r"[0-9]", self.content[self.index]):
                 value += self.content[self.index]
                 self.index += 1
