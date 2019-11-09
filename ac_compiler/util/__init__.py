@@ -1,1 +1,1 @@
-from .error import LexicalError, SyntaxParsingError
+from .error import LexicalError, SyntaxParsingError, SymbolError
