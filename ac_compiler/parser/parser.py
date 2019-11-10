@@ -1,6 +1,7 @@
 from typing import List, Optional
 from ..scanner import Token, Tokens
 from ..util import SyntaxParsingError
+from .ast import AST, Node
 
 
 class Parser:
@@ -12,6 +13,7 @@ class Parser:
         self.tokens = tokens
         self.index = 0
         self.length = len(tokens)
+        self.ast = None
 
     def peek(self) -> Optional[Token]:
         """
@@ -41,7 +43,7 @@ class Parser:
         """
         self.parse_program()
 
-    def expect(self, expected: Tokens):
+    def expect(self, expected: Tokens) -> Token:
         """
         Advances the token stream, checking that the removed token
         matches that which was expected.
@@ -50,7 +52,7 @@ class Parser:
         token = self.advance()
         if token.type == expected:
             print(token)
-            pass
+            return token
         else:
             raise SyntaxParsingError(expected, token)
 
@@ -58,6 +60,8 @@ class Parser:
         """
         Triggers syntax parsing of a whole program according to ac grammar.
         """
+        self.ast = AST()
+
         expected = [Tokens.FLOATDCL, Tokens.INTDCL, Tokens.ID, Tokens.PRINT,
                     Tokens.END]
         if self.peek().type in expected:
@@ -89,14 +93,15 @@ class Parser:
         Parse a single declaration of an ac variable (float or int).
         """
         if self.peek().type == Tokens.FLOATDCL:
-            self.expect(Tokens.FLOATDCL)
-            self.expect(Tokens.ID)
+            declaration = self.expect(Tokens.FLOATDCL)
+            id_ = self.expect(Tokens.ID)
         elif self.peek().type == Tokens.INTDCL:
-            self.expect(Tokens.INTDCL)
-            self.expect(Tokens.ID)
+            declaration = self.expect(Tokens.INTDCL)
+            id_ = self.expect(Tokens.ID)
         else:
             raise SyntaxParsingError([Tokens.FLOATDCL, Tokens.INTDCL],
                                      self.peek())
+        self.ast.root.add_child(declaration.type, id_)
 
     def parse_statements(self):
         """
@@ -116,13 +121,17 @@ class Parser:
         Parse a single statement in the ac programming language.
         """
         if self.peek().type == Tokens.ID:
-            self.expect(Tokens.ID)
-            self.expect(Tokens.ASSIGN)
-            self.parse_value()
+            id_ = self.expect(Tokens.ID)
+            assign = self.expect(Tokens.ASSIGN)
+            value = self.parse_value()
+            statement = self.ast.root.add_child(assign.type)
+            statement.add_child(id_.type, id_.value)
+            statement.add_child(value.type, value.value)
             self.parse_expression()
         elif self.peek().type == Tokens.PRINT:
-            self.expect(Tokens.PRINT)
-            self.expect(Tokens.ID)
+            print_ = self.expect(Tokens.PRINT)
+            id_ = self.expect(Tokens.ID)
+            self.ast.root.add_child(print_.type, id_.value)
         else:
             raise SyntaxParsingError
 
@@ -132,14 +141,15 @@ class Parser:
         by an ID.
         """
         if self.peek().type == Tokens.ID:
-            self.expect(Tokens.ID)
+            value = self.expect(Tokens.ID)
         elif self.peek().type == Tokens.INUM:
-            self.expect(Tokens.INUM)
+            value = self.expect(Tokens.INUM)
         elif self.peek().type == Tokens.FNUM:
-            self.expect(Tokens.FNUM)
+            value = self.expect(Tokens.FNUM)
         else:
             raise SyntaxParsingError([Tokens.ID, Tokens.FNUM, Tokens.INUM],
                                      self.peek())
+        return value
 
     def parse_expression(self):
         """
