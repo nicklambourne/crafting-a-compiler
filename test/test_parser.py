@@ -6,3 +6,4 @@ def test_parser():
     scanner = Scanner("sample.ac")
     parser = Parser(scanner.tokens)
     parser.parse()
+    print(parser)

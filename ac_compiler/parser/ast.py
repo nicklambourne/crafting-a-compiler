@@ -22,8 +22,22 @@ class Node:
         self.children.append(child)
         return child
 
+    def add_child_node(self,
+                       node: "Node"):
+        self.children.append(node)
+
     def get_children(self) -> List["Node"]:
         return self.children
+
+    def get(self, index: int) -> "Node":
+        if index < len(self.children):
+            return self.children[index]
+        else:
+            raise IndexError(f"Index {index} not available in {len(self.children)} "
+                             f"children")
+
+    def __str__(self):
+        return f"<Node {', '.join([child.type for child in self.children])}>"
 
 
 class AST:

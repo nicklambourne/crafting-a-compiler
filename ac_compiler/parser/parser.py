@@ -108,7 +108,8 @@ class Parser:
         Parse one or more ac language statements.
         """
         if self.peek().type in [Tokens.ID, Tokens.PRINT]:
-            self.parse_statement()
+            statement = self.parse_statement()
+            self.ast.root.children.add_child_node(statement)
             self.parse_statements()
         elif self.peek().type == Tokens.END:
             pass
@@ -116,7 +117,7 @@ class Parser:
             raise SyntaxParsingError([Tokens.ID, Tokens.PRINT, Tokens.END],
                                      self.peek())
 
-    def parse_statement(self):
+    def parse_statement(self) -> Optional[Node]:
         """
         Parse a single statement in the ac programming language.
         """
@@ -124,14 +125,17 @@ class Parser:
             id_ = self.expect(Tokens.ID)
             assign = self.expect(Tokens.ASSIGN)
             value = self.parse_value()
-            statement = self.ast.root.add_child(assign.type)
+            statement = Node(assign.type)
             statement.add_child(id_.type, id_.value)
             statement.add_child(value.type, value.value)
-            self.parse_expression()
+            expression = self.parse_expression(statement)
+            if expression:
+                statement.add_child(expression)
+            return statement
         elif self.peek().type == Tokens.PRINT:
             print_ = self.expect(Tokens.PRINT)
             id_ = self.expect(Tokens.ID)
-            self.ast.root.add_child(print_.type, id_.value)
+            return Node(print_.type, id_.value)
         else:
             raise SyntaxParsingError
 
@@ -151,21 +155,22 @@ class Parser:
                                      self.peek())
         return value
 
-    def parse_expression(self):
+    def parse_expression(self, node: Optional[Node] = None):
         """
         Parses a PLUS or MINUS expression.
         """
         if self.peek().type == Tokens.PLUS:
-            self.expect(Tokens.PLUS)
-            self.parse_value()
-            self.parse_expression()
+            token = self.expect(Tokens.PLUS).type
         elif self.peek().type == Tokens.MINUS:
-            self.expect(Tokens.MINUS)
-            self.parse_value()
-            self.parse_expression()
+            token = self.expect(Tokens.MINUS).type
         elif self.peek().type in [Tokens.ID, Tokens.PRINT, Tokens.END]:
-            pass
+            return
         else:
             raise SyntaxParsingError([Tokens.PLUS, Tokens.MINUS, Tokens.ID,
                                       Tokens.PRINT, Tokens.END],
                                      self.peek())
+        assign = self.ast.root.add_child(token) if not node \
+            else node.add_child(token)
+        value = self.parse_value()
+        node = assign.add_child(value.type, value.value)
+        return self.parse_expression(node)
