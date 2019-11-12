@@ -61,4 +61,3 @@ class AST:
 
     def children(self) -> List[Node]:
         return self.children
-

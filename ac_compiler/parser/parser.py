@@ -51,7 +51,6 @@ class Parser:
         """
         token = self.advance()
         if token.type == expected:
-            print(token)
             return token
         else:
             raise SyntaxParsingError(expected, token)
