@@ -18,6 +18,7 @@ class Tokens(Enum):
     FNUM = r"[0-9]+\.[0-9]+"
     BLANK = r" +"
     END = r"\$"
+    NONE = ""
 
 
 class Token:

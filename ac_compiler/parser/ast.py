@@ -18,12 +18,13 @@ class Node:
     def add_child(self,
                   type_: Optional[Tokens] = None,
                   value: Optional[Union[str, float, int]] = None):
-        child = Node(self.parent, type_, value)
+        child = Node(self, type_, value)
         self.children.append(child)
         return child
 
     def add_child_node(self,
                        node: "Node"):
+        node.parent = self
         self.children.append(node)
 
     def get_children(self) -> List["Node"]:
@@ -36,14 +37,28 @@ class Node:
             raise IndexError(f"Index {index} not available in {len(self.children)} "
                              f"children")
 
+    def __repr__(self):
+        if self.children:
+            children = " - " + ", ".join([str(child.type) for child in self.children])
+        else:
+            children = ""
+
+        type_ = self.type if self.type else Tokens.NONE
+        return f"<Node {type_}{children}>"
+
     def __str__(self):
-        return f"<Node {', '.join([child.type for child in self.children])}>"
+        return str(self.__repr__())
 
 
 class AST:
     """
-    An Abstract Syntax Tree
+    An Abstract Syntax Tree (of Nodes)
     """
 
     def __init__(self):
         self.root = Node(None)
+        self.children = self.root.children
+
+    def children(self) -> List[Node]:
+        return self.children
+

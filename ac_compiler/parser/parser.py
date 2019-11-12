@@ -108,8 +108,7 @@ class Parser:
         Parse one or more ac language statements.
         """
         if self.peek().type in [Tokens.ID, Tokens.PRINT]:
-            statement = self.parse_statement()
-            self.ast.root.children.add_child_node(statement)
+            self.parse_statement()
             self.parse_statements()
         elif self.peek().type == Tokens.END:
             pass
@@ -125,17 +124,19 @@ class Parser:
             id_ = self.expect(Tokens.ID)
             assign = self.expect(Tokens.ASSIGN)
             value = self.parse_value()
-            statement = Node(assign.type)
+            statement = self.ast.root.add_child(assign.type)
             statement.add_child(id_.type, id_.value)
-            statement.add_child(value.type, value.value)
-            expression = self.parse_expression(statement)
+
+            expression = self.parse_expression(statement, value)
             if expression:
-                statement.add_child(expression)
+                pass  # Already added in expression parsing
+            else:
+                statement.add_child(value.type, value.value)
             return statement
         elif self.peek().type == Tokens.PRINT:
             print_ = self.expect(Tokens.PRINT)
             id_ = self.expect(Tokens.ID)
-            return Node(print_.type, id_.value)
+            return self.ast.root.add_child(print_.type, id_.value)
         else:
             raise SyntaxParsingError
 
@@ -155,7 +156,8 @@ class Parser:
                                      self.peek())
         return value
 
-    def parse_expression(self, node: Optional[Node] = None):
+    def parse_expression(self, node: Optional[Node] = None,
+                         value: Optional[Token] = None):
         """
         Parses a PLUS or MINUS expression.
         """
@@ -169,8 +171,10 @@ class Parser:
             raise SyntaxParsingError([Tokens.PLUS, Tokens.MINUS, Tokens.ID,
                                       Tokens.PRINT, Tokens.END],
                                      self.peek())
-        assign = self.ast.root.add_child(token) if not node \
+        operation = self.ast.root.add_child(token) if not node \
             else node.add_child(token)
+        operation.add_child(value.type, value.value)
         value = self.parse_value()
-        node = assign.add_child(value.type, value.value)
-        return self.parse_expression(node)
+        node = operation.add_child(value.type, value.value)
+        self.parse_expression(node)
+        return operation
