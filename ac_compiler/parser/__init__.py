@@ -1,2 +1,2 @@
 from .parser import Parser
-from .ast import AST
+from .ast import AST, Node

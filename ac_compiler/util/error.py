@@ -34,3 +34,8 @@ class SyntaxParsingError(Error):
 class SymbolError(Error):
     def __init__(self, message: str):
         super().__init__(message)
+
+
+class SemanticError(Error):
+    def __init__(self, message: str):
+        super().__init__(message)
