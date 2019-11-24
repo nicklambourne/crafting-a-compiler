@@ -10,3 +10,4 @@ def test_semantic():
     analyser = SemanticAnalyser(ast=parser.ast)
     analyser.populate_symbol_table()
     print(analyser.symbol_table)
+    analyser.analyse()

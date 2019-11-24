@@ -29,5 +29,5 @@ class SymbolTable:
         return f"<Symbol Table: {len(self.symbols.keys())} entries>"
 
     def __str__(self):
-        entries = "\n".join([str(key) + str(value) for key, value in self.symbols.items()])
+        entries = "\n".join([f"{str(key)} {str(value)}" for key, value in self.symbols.items()])
         return f"<Symbol Table:\n{entries}>"

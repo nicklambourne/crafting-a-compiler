@@ -5,6 +5,10 @@ from ..util import SymbolError, SemanticError
 from .symbol_table import SymbolTable, DataType
 
 
+COMPUTATION_NODES = [Tokens.PLUS, Tokens.MINUS]
+CONSTANT_NODES = [Tokens.INUM, Tokens.FNUM]
+
+
 class SemanticAnalyser:
     def __init__(self, ast: AST):
         self.ast = ast
@@ -55,7 +59,7 @@ class SemanticAnalyser:
         elif node.datatype == DataType.INT and type_ == DataType.FLOAT:
             node.type = Tokens.FNUM
             node.datatype = type_
-            node.value = float(node.value)
+            # node.value = float(node.value)
 
     @staticmethod
     def visit_computation(node: Node):
@@ -65,8 +69,9 @@ class SemanticAnalyser:
     def visit_assignment(node: Node):
         node.datatype = SemanticAnalyser.convert(node.right(), node.left().datatype)
 
-    def visit_reference(self, node: Node):
-        node.datatype = self.symbol_table.lookup(node.value)
+    @staticmethod
+    def visit_reference(symbol_table: SymbolTable, node: Node):
+        node.datatype = symbol_table.lookup(node.value)
 
     @staticmethod
     def visit_constant(node: Node):
@@ -76,3 +81,20 @@ class SemanticAnalyser:
             node.datatype = DataType.INT
         else:
             raise SemanticError("Non-constant node type")
+
+    def analyse(self):
+        self.analyse_node(self.ast.root)
+
+    def analyse_node(self, node: Node):
+        children = node.get_children()
+        for child in children:
+            self.analyse_node(child)
+
+        if node.type in COMPUTATION_NODES:
+            SemanticAnalyser.visit_computation(node)
+        elif node.type == Tokens.ASSIGN:
+            SemanticAnalyser.visit_assignment(node)
+        elif node.type in CONSTANT_NODES:
+            SemanticAnalyser.visit_constant(node)
+        elif node.type == Tokens.ID:
+            SemanticAnalyser.visit_reference(self.symbol_table, node)
