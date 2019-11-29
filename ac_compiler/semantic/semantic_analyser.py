@@ -10,6 +10,10 @@ CONSTANT_NODES = [Tokens.INUM, Tokens.FNUM]
 
 
 class SemanticAnalyser:
+    """
+    Performs semantic (meaning) analysis on an ac program.
+    Focuses (at present) on correct variable symbol usage (initialisation, reference etc.)
+    """
     def __init__(self, ast: AST):
         self.ast = ast
         self.symbol_table = SymbolTable()
@@ -40,6 +44,14 @@ class SemanticAnalyser:
 
     @staticmethod
     def consistent(node1: Node, node2: Node) -> DataType:
+        """
+        Determines the most general type applicable to two nodes and ensures
+        (through destructive change) that the types of both are consistent with
+        one another.
+        :param node1: the first node to make consistent
+        :param node2: the second node to make consistent
+        :return: the new (consistent) datatype the nodes now share
+        """
         new_type = SemanticAnalyser.generalise(node1.datatype, node2.datatype)
         SemanticAnalyser.convert(node1, new_type)
         SemanticAnalyser.convert(node2, new_type)
@@ -48,26 +60,45 @@ class SemanticAnalyser:
     @staticmethod
     def generalise(type1: DataType,
                    type2: DataType) -> DataType:
+        """
+        Finds the most general datatype applicable to two nodes (i.e. float unless both are
+        integers).
+        :param type1: the first type
+        :param type2: the second type
+        :return: the newly found (most general) type
+        """
         if type1 == DataType.FLOAT or type2 == DataType.FLOAT:
             return DataType.FLOAT
         return DataType.INT
 
     @staticmethod
-    def convert(node: Node, type_: DataType):
+    def convert(node: Node, type_: DataType) -> DataType:
+        """
+        Converts a single node to the given DataType.
+        :param node: the node to convert
+        :param type_: the type to convert the node to
+        """
         if node.datatype == DataType.FLOAT and type_ == DataType.INT:
             raise SemanticError("Illegal type conversion")
         elif node.datatype == DataType.INT and type_ == DataType.FLOAT:
             node.type = Tokens.FNUM
             node.datatype = type_
             # node.value = float(node.value)
+            return type_
 
     @staticmethod
     def visit_computation(node: Node):
+        """
+
+        :param node:
+        :return:
+        """
         node.datatype = SemanticAnalyser.consistent(node.left(), node.right())
 
     @staticmethod
     def visit_assignment(node: Node):
         node.datatype = SemanticAnalyser.convert(node.right(), node.left().datatype)
+
 
     @staticmethod
     def visit_reference(symbol_table: SymbolTable, node: Node):
