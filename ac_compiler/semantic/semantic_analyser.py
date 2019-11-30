@@ -87,25 +87,41 @@ class SemanticAnalyser:
             return type_
 
     @staticmethod
-    def visit_computation(node: Node):
+    def visit_computation(node: Node) -> None:
         """
-
-        :param node:
-        :return:
+        Visits a computation node and sets its DataType to the consistent type derived from its
+        two children.
+        :param node: the computation node to visit
         """
         node.datatype = SemanticAnalyser.consistent(node.left(), node.right())
 
     @staticmethod
-    def visit_assignment(node: Node):
+    def visit_assignment(node: Node) -> None:
+        """
+        Visits an assignment node and sets its datatype to the type of the value node being
+        assigned.
+        :param node: the assignment node to visit
+        """
         node.datatype = SemanticAnalyser.convert(node.right(), node.left().datatype)
 
 
     @staticmethod
-    def visit_reference(symbol_table: SymbolTable, node: Node):
+    def visit_reference(symbol_table: SymbolTable, node: Node) -> None:
+        """
+        Visits a reference node and sets its datatype to the type of the variable as listed in
+        the symbol table.
+        :param symbol_table: the table to refer to for lookup
+        :param node: the reference node to visit
+        """
         node.datatype = symbol_table.lookup(node.value)
 
     @staticmethod
-    def visit_constant(node: Node):
+    def visit_constant(node: Node) -> None:
+        """
+        Visits a constant node and sets its datatype to the relevant type for the Token (i.e.
+        FLOAT for FNUM and INT for INUM).
+        :param node: the constant node to visit
+        """
         if node.type == Tokens.FNUM:
             node.datatype = DataType.FLOAT
         elif node.type == Tokens.INUM:
@@ -113,10 +129,17 @@ class SemanticAnalyser:
         else:
             raise SemanticError("Non-constant node type")
 
-    def analyse(self):
+    def analyse(self) -> None:
+        """
+        Analyses the whole tree by calling analyse_node on the root of the AST.
+        """
         self.analyse_node(self.ast.root)
 
-    def analyse_node(self, node: Node):
+    def analyse_node(self, node: Node) -> None:
+        """
+        Uses a stack-based approach to visit all the children of a node in post-order.
+        :param node: the node to begin analysis from
+        """
         children = node.get_children()
         for child in children:
             self.analyse_node(child)

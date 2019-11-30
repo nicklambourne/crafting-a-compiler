@@ -2,6 +2,9 @@ from ..parser.ast import Node
 
 
 class CodeGenerator:
+    """
+    Generates code for the dc language from an AST of the ac language.
+    """
     def __init__(self):
         self.stack = list()
         self.register = dict()
@@ -16,7 +19,7 @@ class CodeGenerator:
     def visit_computation(self, node: Node):
         self.codegen(node.left())
         self.codegen(node.right())
-        self.emit(node.)
+        self.emit(node.value)
 
     def visit_reference(self):
         pass
