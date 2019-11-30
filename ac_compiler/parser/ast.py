@@ -80,7 +80,18 @@ class Node:
         else:
             raise IndexError(f"Could not get left with {len(self.children)} children")
 
-    def __repr__(self):
+    def child(self) -> Node:
+        """
+        Returns the only child of a node with two children.
+        N.B. Will error if the given node does not have one child exactly.
+        :return: the only child node
+        """
+        if len(self.children) == 1:
+            return self.children[0]
+        else:
+            raise IndexError(f"Could not get child with {len(self.children)} children")
+
+    def __repr__(self) -> str:
         if self.children:
             children = " - " + ", ".join([str(child.type) for child in self.children])
         else:
@@ -89,7 +100,7 @@ class Node:
         type_ = self.type if self.type else Tokens.NONE
         return f"<Node {type_}{children}>"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.__repr__())
 
 
