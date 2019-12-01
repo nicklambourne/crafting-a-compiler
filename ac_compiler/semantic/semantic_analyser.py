@@ -104,7 +104,6 @@ class SemanticAnalyser:
         """
         node.datatype = SemanticAnalyser.convert(node.right(), node.left().datatype)
 
-
     @staticmethod
     def visit_reference(symbol_table: SymbolTable, node: Node) -> None:
         """

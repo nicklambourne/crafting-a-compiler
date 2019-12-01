@@ -19,6 +19,7 @@ class Tokens(Enum):
     BLANK = r" +"
     END = r"\$"
     NONE = ""
+    CONVERT = "CV"
 
 
 class Token:

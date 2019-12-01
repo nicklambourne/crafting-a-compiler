@@ -4,13 +4,15 @@ from ac_compiler.semantic import SemanticAnalyser
 from ac_compiler.generator import CodeGenerator
 
 
-def test_semantic():
+def test_generator():
     scanner = Scanner("sample.ac")
     parser = Parser(scanner.tokens)
     parser.parse()
     analyser = SemanticAnalyser(ast=parser.ast)
     analyser.populate_symbol_table()
-    print(analyser.symbol_table)
+    print(str(analyser.symbol_table) + "\n")
     analyser.analyse()
     generator = CodeGenerator(ast=analyser.ast)
-    _ = generator.generate()
+    dc_code = generator.generate()
+    for statement in dc_code:
+        print(statement)
